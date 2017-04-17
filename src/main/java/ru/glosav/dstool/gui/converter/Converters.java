@@ -1,0 +1,8 @@
+package ru.glosav.dstool.gui.converter;
+
+/**
+ * Created by abalyshev on 14.04.17.
+ */
+public class Converters {
+    public static final StringToCqlConnection STRING_TO_CQL_CONNECTION = new StringToCqlConnection();
+}
