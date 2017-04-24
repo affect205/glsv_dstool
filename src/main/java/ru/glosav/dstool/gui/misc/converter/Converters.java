@@ -1,4 +1,4 @@
-package ru.glosav.dstool.gui.converter;
+package ru.glosav.dstool.gui.misc.converter;
 
 /**
  * Created by abalyshev on 14.04.17.

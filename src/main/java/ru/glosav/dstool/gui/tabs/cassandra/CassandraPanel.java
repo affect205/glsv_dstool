@@ -8,6 +8,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.GridPane;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.glosav.dstool.conn.ClusterConnector;
 import ru.glosav.dstool.entity.CqlConnection;
@@ -20,7 +21,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-import static ru.glosav.dstool.gui.converter.Converters.STRING_TO_CQL_CONNECTION;
+import static ru.glosav.dstool.gui.misc.converter.Converters.STRING_TO_CQL_CONNECTION;
 
 /**
  * Created by abalyshev on 14.04.17.
@@ -29,6 +30,9 @@ import static ru.glosav.dstool.gui.converter.Converters.STRING_TO_CQL_CONNECTION
 public class CassandraPanel extends GridPane {
     @Autowired
     private ClusterConnector connector;
+
+    @Autowired
+    private CassandraQueryPanel queryPanel;
 
     private Dialog<CqlConnection> cqlConnDlg;
     private ComboBox<CqlConnection> hostCmb;
@@ -57,7 +61,7 @@ public class CassandraPanel extends GridPane {
         addBtn = new Button("+");
         addBtn.setOnAction(event -> {
             Optional<CqlConnection> result = cqlConnDlg.showAndWait();
-            if (result.isPresent()) {
+            if (result.isPresent() && !hosts.contains(result.get())) {
                 hosts.add(result.get());
             }
         });
@@ -68,6 +72,7 @@ public class CassandraPanel extends GridPane {
                     .ifPresent(cqlConn -> {
                         try {
                             connector.connect(cqlConn);
+                            queryPanel.show();
                             ConsoleUtils.printf("Connection to %s has successfully established", Objects.toString(cqlConn));
                         } catch (Exception e) {
                             ConsoleUtils.printf("Error! %s\n", e.getMessage());

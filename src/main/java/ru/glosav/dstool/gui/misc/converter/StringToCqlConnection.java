@@ -1,4 +1,4 @@
-package ru.glosav.dstool.gui.converter;
+package ru.glosav.dstool.gui.misc.converter;
 
 import javafx.util.StringConverter;
 import ru.glosav.dstool.entity.CqlConnection;

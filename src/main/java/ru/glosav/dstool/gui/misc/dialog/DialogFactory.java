@@ -32,10 +32,14 @@ public class DialogFactory {
         ButtonType buttonTypeOk = new ButtonType("Ok", OK_DONE);
         cqlConnDlg.getDialogPane().getButtonTypes().add(buttonTypeOk);
         cqlConnDlg.setResultConverter(b -> {
-            if (b == buttonTypeOk && isEmpty(hostTf.getText()) && isEmpty(keySpaceTf.getText())) {
+            if (b == buttonTypeOk && !isEmpty(hostTf.getText()) && !isEmpty(keySpaceTf.getText())) {
                 return new CqlConnection(hostTf.getText(), keySpaceTf.getText());
             }
             return null;
+        });
+        cqlConnDlg.setOnHidden(event -> {
+            hostTf.clear();
+            keySpaceTf.clear();
         });
         return cqlConnDlg;
     }
