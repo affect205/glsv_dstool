@@ -8,7 +8,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import ru.glosav.dstool.event.ConsoleEvent;
 import ru.glosav.dstool.gui.tabs.cassandra.CassandraTab;
 import ru.glosav.dstool.gui.misc.ConsoleTextArea;
 
@@ -18,23 +20,24 @@ import javax.annotation.PostConstruct;
  * Created by abalyshev on 20.07.16.
  */
 @Component
-public class MainPanel extends BorderPane {
+public class MainPanel extends BorderPane
+        implements ApplicationListener<ConsoleEvent> {
 
     @Autowired
     private CassandraTab cassandraTab;
 
-    ConsoleTextArea outputBar;
-    TabPane tabPane;
-    Tab uploadTab;
-    Tab fetchTab;
-    SplitPane splitCenter;
+    @Autowired
+    private ConsoleTextArea outputBar;
+
+    private TabPane tabPane;
+    private Tab uploadTab;
+    private Tab fetchTab;
+    private SplitPane splitCenter;
 
     public MainPanel() {}
 
     @PostConstruct
     public void onInit() {
-        outputBar = new ConsoleTextArea();
-
         tabPane = new TabPane();
         uploadTab = new Tab();
         uploadTab.setText("Загрузка данных");
@@ -68,5 +71,10 @@ public class MainPanel extends BorderPane {
         splitCenter.setDividerPositions(1.0);
 
         setCenter(splitCenter);
+    }
+
+    @Override
+    public void onApplicationEvent(ConsoleEvent event) {
+        outputBar.println(event.getMessage());
     }
 }

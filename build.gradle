@@ -18,9 +18,12 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
-	mavenLocal()
 	mavenCentral()
+	mavenLocal()
 	maven { url "https://repository.jboss.org/nexus/content/repositories/releases/" }
+	maven { url "http://bm.glosav.ax:8077/nexus/content/repositories/thirdparty/" }
+	maven { url "http://bm.glosav.ax:8077/nexus/content/repositories/glosav-release/" }
+	maven { url "http://bm.glosav.ax:8077/nexus/content/repositories/glosav-snapshot/" }
 }
 
 
@@ -29,7 +32,14 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-integration')
 	compile('org.springframework.boot:spring-boot-starter-security')
 
+	// other libs
 	compile("com.datastax.cassandra:cassandra-driver-core:3.1.0")
+	compile("com.google.code.gson:gson:2.8.0")
+
+	// cassandra's api
+	compile("ru.glosav.kiask:cassandra-dao-impl:0.8-SNAPSHOT") {
+		changing = true
+	}
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }

@@ -8,10 +8,11 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.GridPane;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import ru.glosav.dstool.conn.ClusterConnector;
 import ru.glosav.dstool.entity.CqlConnection;
+import ru.glosav.dstool.event.ConsoleEvent;
 import ru.glosav.dstool.gui.misc.dialog.DialogFactory;
 import ru.glosav.dstool.gui.utils.ConsoleUtils;
 
@@ -21,6 +22,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static ru.glosav.dstool.gui.misc.converter.Converters.STRING_TO_CQL_CONNECTION;
 
 /**
@@ -33,6 +35,9 @@ public class CassandraPanel extends GridPane {
 
     @Autowired
     private CassandraQueryPanel queryPanel;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     private Dialog<CqlConnection> cqlConnDlg;
     private ComboBox<CqlConnection> hostCmb;
@@ -73,9 +78,9 @@ public class CassandraPanel extends GridPane {
                         try {
                             connector.connect(cqlConn);
                             queryPanel.show();
-                            ConsoleUtils.printf("Connection to %s has successfully established", Objects.toString(cqlConn));
+                            eventPublisher.publishEvent(new ConsoleEvent(this, format("Connection to %s has successfully established", Objects.toString(cqlConn))));
                         } catch (Exception e) {
-                            ConsoleUtils.printf("Error! %s\n", e.getMessage());
+                            eventPublisher.publishEvent(new ConsoleEvent(this, format("Error! %s", e.getMessage())));
                         }
                     });
         });

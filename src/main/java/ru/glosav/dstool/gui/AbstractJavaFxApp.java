@@ -1,4 +1,4 @@
-package ru.glosav.dstool.app;
+package ru.glosav.dstool.gui;
 
 import javafx.application.Application;
 import org.springframework.context.ConfigurableApplicationContext;
