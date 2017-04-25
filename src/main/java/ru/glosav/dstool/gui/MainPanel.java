@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import ru.glosav.dstool.event.ConsoleEvent;
-import ru.glosav.dstool.gui.tabs.cassandra.CassandraTab;
+import ru.glosav.dstool.gui.tabs.cassandra.CqlTab;
 import ru.glosav.dstool.gui.misc.ConsoleTextArea;
 
 import javax.annotation.PostConstruct;
@@ -24,7 +24,7 @@ public class MainPanel extends BorderPane
         implements ApplicationListener<ConsoleEvent> {
 
     @Autowired
-    private CassandraTab cassandraTab;
+    private CqlTab cassandraTab;
 
     @Autowired
     private ConsoleTextArea outputBar;

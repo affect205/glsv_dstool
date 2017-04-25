@@ -10,11 +10,11 @@ import javax.annotation.PostConstruct;
  * Created by abalyshev on 14.04.17.
  */
 @Component
-public class CassandraTab extends Tab {
+public class CqlTab extends Tab {
     @Autowired
-    private CassandraPanel cassandraPanel;
+    private CqlPanel cassandraPanel;
 
-    public CassandraTab() {
+    public CqlTab() {
         super();
         setText("Cassandra");
         setClosable(false);

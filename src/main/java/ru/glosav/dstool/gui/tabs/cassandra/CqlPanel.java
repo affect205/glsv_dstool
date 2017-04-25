@@ -14,7 +14,6 @@ import ru.glosav.dstool.conn.ClusterConnector;
 import ru.glosav.dstool.entity.CqlConnection;
 import ru.glosav.dstool.event.ConsoleEvent;
 import ru.glosav.dstool.gui.misc.dialog.DialogFactory;
-import ru.glosav.dstool.gui.utils.ConsoleUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -29,12 +28,12 @@ import static ru.glosav.dstool.gui.misc.converter.Converters.STRING_TO_CQL_CONNE
  * Created by abalyshev on 14.04.17.
  */
 @Component
-public class CassandraPanel extends GridPane {
+public class CqlPanel extends GridPane {
     @Autowired
     private ClusterConnector connector;
 
     @Autowired
-    private CassandraQueryPanel queryPanel;
+    private CqlQueryPanel queryPanel;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -44,7 +43,7 @@ public class CassandraPanel extends GridPane {
     private Button connectBtn;
     private Button addBtn;
 
-    public CassandraPanel() {
+    public CqlPanel() {
         super();
         setHgap(10);
         setVgap(10);

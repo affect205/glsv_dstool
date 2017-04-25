@@ -6,4 +6,5 @@ package ru.glosav.dstool.gui.misc.converter;
 public class Converters {
     public static final StringToCqlConnection STRING_TO_CQL_CONNECTION = new StringToCqlConnection();
     public static final StringToMethod STRING_TO_METHOD = new StringToMethod();
+    public static final StringToCqlApiMethod STRING_TO_CQL_API_METHOD = new StringToCqlApiMethod();
 }
