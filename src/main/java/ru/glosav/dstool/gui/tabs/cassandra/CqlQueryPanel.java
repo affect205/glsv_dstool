@@ -13,14 +13,14 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-import ru.glosav.cassandra.dao.ICassandraDaoLocal;
-import ru.glosav.cassandra.dao.impl.CassandraGate;
 import ru.glosav.dstool.dto.MessageDTO;
 import ru.glosav.dstool.entity.CqlApiMethod;
+import ru.glosav.dstool.event.ExecEvent;
 import ru.glosav.dstool.gui.misc.ConsoleTextArea;
-import ru.glosav.dstool.model.CqlApiIModel;
-import ru.glosav.dstool.service.CassandraService;
+import ru.glosav.dstool.service.CqlService;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
@@ -28,37 +28,41 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ru.glosav.dstool.gui.misc.converter.Converters.STRING_TO_CQL_API_METHOD;
-import static ru.glosav.dstool.gui.misc.converter.Converters.STRING_TO_METHOD;
 import static ru.glosav.dstool.model.CqlApiIModel.getCqlApiMethods;
 
 /**
  * Created by abalyshev on 18.04.17.
  */
 @Component
-public class CqlQueryPanel extends Stage {
-
+public class CqlQueryPanel extends Stage
+        implements ApplicationListener<ExecEvent> {
     private static final Logger log = LoggerFactory.getLogger(CqlQueryPanel.class);
 
     @Autowired
-    private CassandraService cassandraService;
+    private CqlService cqlService;
 
     @Autowired
     private ConsoleTextArea consoleTA;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    private VBox argWrap;
+    private VBox leftPanel;
+    private VBox bottomPanel;
+    private VBox centerPanel;
 
     private BorderPane root;
     private TextArea queryTA;
     private Button runBtn;
     private ComboBox<CqlApiMethod> apiCb;
-    private VBox leftPanel;
     private Map<Integer, ArgPanel> argPanelCache;
-
-    //private ComboBox<CqlApiMethod> apiCb;
 
     public CqlQueryPanel() {
         setWidth(720);
@@ -106,6 +110,12 @@ public class CqlQueryPanel extends Stage {
         leftPanel.setPrefWidth(320);
         leftPanel.setPrefHeight(400);
 
+        centerPanel = new VBox();
+        bottomPanel = new VBox();
+        bottomPanel.setPrefHeight(120);
+
+        argWrap = new VBox();
+
         root = new BorderPane();
 
         //apiLv = new ListView<>();
@@ -133,12 +143,13 @@ public class CqlQueryPanel extends Stage {
         apiCb.setConverter(STRING_TO_CQL_API_METHOD);
         apiCb.getSelectionModel().selectedItemProperty().addListener((options, oldValue, newValue) -> {
             Platform.runLater(() -> {
-                ArgPanel argPanel = argPanelCache.get(newValue.hashCode());
-                if (argPanel == null) {
-                    argPanel = new ArgPanel(newValue.getArgs());
+                ArgPanel ap = argPanelCache.get(newValue.hashCode());
+                if (ap == null) {
+                    ap = new ArgPanel(newValue.getArgs());
+                    argPanelCache.put(newValue.hashCode(), ap);
                 }
-                leftPanel.getChildren().clear();
-                leftPanel.getChildren().addAll(apiCb, argPanel);
+                argWrap.getChildren().clear();
+                argWrap.getChildren().addAll(ap);
             });
         });
 
@@ -146,23 +157,39 @@ public class CqlQueryPanel extends Stage {
 
         runBtn = new Button(">");
         runBtn.setOnAction(event -> {
-            String query = queryTA.getText();
-            try {
-                List<String> result = cassandraService.execute(query);
-                consoleTA.println(result);
-            } catch (Throwable e) {
-                consoleTA.println(e.getMessage());
-            }
+            eventPublisher.publishEvent(new ExecEvent(this));
         });
 
-        leftPanel.getChildren().add(apiCb);
+        leftPanel.getChildren().addAll(apiCb, argWrap);
+        centerPanel.getChildren().addAll(queryTA);
+        bottomPanel.getChildren().addAll(table);
 
-        root.setCenter(queryTA);
         root.setTop(runBtn);
+        root.setCenter(centerPanel);
         root.setLeft(leftPanel);
-        root.setBottom(table);
+        root.setBottom(bottomPanel);
 
         setScene(new Scene(root));
         initModality(Modality.WINDOW_MODAL);
+    }
+
+    @Override
+    public void onApplicationEvent(ExecEvent event) {
+        CqlApiMethod item = apiCb.getSelectionModel().getSelectedItem();
+        if (item != null) {
+            for (Method m : CqlService.class.getMethods()) {
+                if (item.getName().equalsIgnoreCase(m.getName()) && item.getArgs().size() == m.getParameterCount()) {
+                    if (argPanelCache.get(item.hashCode()) != null) {
+                        try {
+                            Object[] args = argPanelCache.get(item.hashCode()).getArgs();
+                            Object result = m.invoke(cqlService, args);
+                            String test = "and...";
+                        } catch (Exception e) {
+                            log.error(e.toString());
+                        }
+                    }
+                }
+            }
+        }
     }
 }

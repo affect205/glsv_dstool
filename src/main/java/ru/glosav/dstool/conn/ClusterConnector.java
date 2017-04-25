@@ -4,6 +4,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import ru.glosav.cassandra.dao.impl.CassandraGate;
 import ru.glosav.dstool.entity.CqlConnection;
 
 import javax.annotation.PostConstruct;
@@ -11,6 +12,7 @@ import javax.annotation.PreDestroy;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
 /**
@@ -48,6 +50,8 @@ public class ClusterConnector {
         if (activeCluster == null) return null;
         if (session == null || session.isClosed()) {
             session = activeCluster.newSession();
+            session.execute(format("use ks;"));
+            CassandraGate.ensureStatementsPrepared(session);
         }
         return session;
     }

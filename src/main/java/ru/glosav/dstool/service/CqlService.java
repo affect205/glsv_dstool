@@ -11,6 +11,7 @@ import ru.glosav.dstool.conn.ClusterConnector;
 import ru.glosav.kiask.protobuf.generated.event.EventProto;
 import ru.glosav.kiask.protobuf.generated.message.MessageProto;
 
+import javax.annotation.PostConstruct;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -21,7 +22,7 @@ import static java.util.Collections.emptyMap;
  * Created by abalyshev on 24.04.17.
  */
 @Service
-public class CassandraService implements ICassandraDaoLocal {
+public class CqlService implements ICassandraDaoLocal {
 
     @Autowired
     ClusterConnector connector;
@@ -68,7 +69,8 @@ public class CassandraService implements ICassandraDaoLocal {
 
     @Override
     public Map<Long, List<EventProto.EVENT>> getEventDataByTypes(Collection<Long> keys, long from, long to, Collection<Integer> evtTypes) {
-        return emptyMap();
+        Map<Long, List<EventProto.EVENT>> result = CassandraGate.getEventDataByTypes(connector.getSession(), keys, from, to, evtTypes);
+        return result;
     }
 
     @Override
@@ -138,7 +140,7 @@ public class CassandraService implements ICassandraDaoLocal {
 
     @Override
     public long getEventDataCount(Collection<Long> keys, long from, long to) {
-        return -1;
+        return CassandraGate.getEventDataCount(connector.getSession(), keys, from, to);
     }
 
     @Override
