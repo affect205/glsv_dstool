@@ -2,6 +2,7 @@ package ru.glosav.dstool.gui.tabs.cassandra;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -59,10 +60,12 @@ public class CqlQueryPanel extends Stage implements ApplicationListener<ExecEven
 
     private VBox argWrap;
     private VBox leftPanel;
-    private VBox bottomPanel;
+    private VBox splitBottom;
     private VBox centerPanel;
 
-    private BorderPane root;
+    private SplitPane root;
+
+    private BorderPane splitTop;
     private TextArea queryTA;
     private Button runBtn;
     private ComboBox<CqlApiMethod> apiCb;
@@ -93,12 +96,12 @@ public class CqlQueryPanel extends Stage implements ApplicationListener<ExecEven
         leftPanel.setPrefHeight(400);
 
         centerPanel = new VBox();
-        bottomPanel = new VBox();
-        bottomPanel.setPrefHeight(120);
+        splitBottom = new VBox();
+        splitBottom.setPrefHeight(120);
 
         argWrap = new VBox();
 
-        root = new BorderPane();
+        splitTop = new BorderPane();
 
         apiCb = new ComboBox<>();
 
@@ -126,12 +129,16 @@ public class CqlQueryPanel extends Stage implements ApplicationListener<ExecEven
 
         leftPanel.getChildren().addAll(apiCb, argWrap);
         centerPanel.getChildren().addAll(queryTA);
-        bottomPanel.getChildren().addAll(cqlTable);
+        splitBottom.getChildren().addAll(cqlTable);
 
-        root.setTop(runBtn);
-        root.setCenter(centerPanel);
-        root.setLeft(leftPanel);
-        root.setBottom(bottomPanel);
+        splitTop.setTop(runBtn);
+        splitTop.setCenter(centerPanel);
+        splitTop.setLeft(leftPanel);
+
+        root = new SplitPane();
+        root.setOrientation(Orientation.VERTICAL);
+        root.getItems().addAll(splitTop, splitBottom);
+        root.setDividerPositions(1.0);
 
         setScene(new Scene(root));
         initModality(Modality.WINDOW_MODAL);
