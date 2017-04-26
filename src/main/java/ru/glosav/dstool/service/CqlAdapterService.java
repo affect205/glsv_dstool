@@ -20,6 +20,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static ru.glosav.cassandra.utils.DateUtils.atTheBeginOfSpan;
 import static ru.glosav.cassandra.utils.DeviceKeySet.generate;
+import static ru.glosav.dstool.entity.rows.dto.DTOResult.*;
 
 /**
  * Created by abalyshev on 26.04.17.
@@ -41,40 +42,40 @@ public class CqlAdapterService implements ICqlAdapter {
     }
 
     @Override
-    public List<MessageDTO> getTrackData(Collection<Long> devops, long from, long to) {
+    public DTOResult getTrackData(Collection<Long> devops, long from, long to) {
         Map<Long, List<MessageProto.MESSAGE>> rawData = CassandraGate.getTrackData(connector.getSession(), devops, from, to);
         List<MessageDTO> result = getTrackDataInternal(rawData);
-        return result;
+        return makeMessageResult(result);
     }
 
     @Override
-    public List<MessageDTO> getTrackData(int deviceId, int operatorId, long from, long to) {
+    public DTOResult getTrackData(int deviceId, int operatorId, long from, long to) {
         long devOp = generate(deviceId, operatorId);
         return getTrackData(asList(devOp), from, to);
     }
 
     @Override
-    public List<EventDTO> getEventData(Collection<Long> devops, long from, long to) {
+    public DTOResult getEventData(Collection<Long> devops, long from, long to) {
         Map<Long, List<EventProto.EVENT>> rawData = CassandraGate.getEventData(connector.getSession(), devops, from, to);
         List<EventDTO> result = getEventDataInternal(rawData);
-        return result;
+        return makeEventResult(result);
     }
 
     @Override
-    public List<EventDTO> getEventData(int deviceId, int operatorId, long from, long to) {
+    public DTOResult getEventData(int deviceId, int operatorId, long from, long to) {
         long devOp = generate(deviceId, operatorId);
         return getEventData(asList(devOp), from, to);
     }
 
     @Override
-    public List<EventDTO> getEventDataByTypes(Collection<Long> devops, long from, long to, Collection<Integer> evtTypes) {
+    public DTOResult getEventDataByTypes(Collection<Long> devops, long from, long to, Collection<Integer> evtTypes) {
         Map<Long, List<EventProto.EVENT>> rawData = CassandraGate.getEventDataByTypes(connector.getSession(), devops, from, to, evtTypes);
         List<EventDTO> result = getEventDataInternal(rawData);
-        return result;
+        return makeEventResult(result);
     }
 
     @Override
-    public List<MessageDTO> getLastPoint(Collection<Long> devops) {
+    public DTOResult getLastPoint(Collection<Long> devops) {
         Map<Long, MessageProto.MESSAGE> rawData = CassandraGate.getLastPoint(connector.getSession(), devops);
         List<MessageDTO> result = getTrackDataInternal(rawData.entrySet().stream()
                 .collect(Collectors.toMap(
@@ -82,76 +83,76 @@ public class CqlAdapterService implements ICqlAdapter {
                         e -> e.getValue() == null ? emptyList() : asList(e.getValue())
                 ))
         );
-        return result;
+        return makeMessageResult(result);
     }
 
     @Override
-    public List<MessageDTO> getLastPoint(int deviceId, int operatorId) {
+    public DTOResult getLastPoint(int deviceId, int operatorId) {
         long devOp = generate(deviceId, operatorId);
         return getLastPoint(asList(devOp));
     }
 
     @Override
-    public List<DeviceRoutesDTO> getDeviceRoutes(Collection<Long> devops, long from, long to) {
+    public DTOResult getDeviceRoutes(Collection<Long> devops, long from, long to) {
         List<DeviceRoutesDTO> result = new ArrayList<>();
         Map<Long, List<CDeviceRoutes>> rawData = CassandraGate.getDeviceRoutes(connector.getSession(), devops, from, to);
         rawData.values().forEach(v -> v.forEach(dr -> {
             DeviceRoutesDTO dto = new DeviceRoutesDTO();
             result.add(dto);
         }));
-        return result;
+        return makeDeviceRoutesResult(result);
     }
 
     @Override
-    public List<DeviceRoutesDTO> getDeviceRoutes(int deviceId, int operatorId, long from, long to) {
+    public DTOResult getDeviceRoutes(int deviceId, int operatorId, long from, long to) {
         long devOp = generate(deviceId, operatorId);
         return getDeviceRoutes(asList(devOp), from, to);
     }
 
     @Override
-    public List<EdgeDTO> getDevopsByEdges(Collection<Long> edges, long from, long to) {
+    public DTOResult getDevopsByEdges(Collection<Long> edges, long from, long to) {
         List<EdgeDTO> result = new ArrayList<>();
         List<Long> rawData = CassandraGate.getDevopsByEdges(connector.getSession(), edges, from, to);
         rawData.forEach(e -> {
             result.add(new EdgeDTO());
         });
-        return result;
+        return makeEdgeResult(result);
     }
 
     @Override
-    public List<CountDTO> getDeviceRoutesCount(Collection<Long> devops, long from, long to) {
+    public DTOResult getDeviceRoutesCount(Collection<Long> devops, long from, long to) {
         long rawData = CassandraGate.getDeviceRoutesCount(connector.getSession(), devops, from, to);
-        return asList(new CountDTO(rawData));
+        return makeCountResult(asList(new CountDTO(rawData)));
     }
 
     @Override
-    public List<CountDTO> getTrackDataCount(Collection<Long> devops, long from, long to) {
+    public DTOResult getTrackDataCount(Collection<Long> devops, long from, long to) {
         long rawData = CassandraGate.getTrackDataCount(connector.getSession(), devops, from, to);
-        return asList(new CountDTO(rawData));
+        return makeCountResult(asList(new CountDTO(rawData)));
     }
 
     @Override
-    public List<CountDTO> getEventDataCount(Collection<Long> devops, long from, long to) {
+    public DTOResult getEventDataCount(Collection<Long> devops, long from, long to) {
         long rawData = CassandraGate.getEventDataCount(connector.getSession(), devops, from, to);
-        return asList(new CountDTO(rawData));
+        return makeCountResult(asList(new CountDTO(rawData)));
     }
 
     @Override
-    public List<CountDTO> getEventDataByTypesCount(Collection<Long> devops, long from, long to, Collection<Integer> evtTypes) {
+    public DTOResult getEventDataByTypesCount(Collection<Long> devops, long from, long to, Collection<Integer> evtTypes) {
         long rawData = CassandraGate.getEventDataByTypesCount(connector.getSession(), devops, from, to, evtTypes);
-        return asList(new CountDTO(rawData));
+        return makeCountResult(asList(new CountDTO(rawData)));
     }
 
     @Override
-    public List<CountDTO> getDevopsByEdgesCount(Collection<Long> edges, long from, long to) {
+    public DTOResult getDevopsByEdgesCount(Collection<Long> edges, long from, long to) {
         long rawData = CassandraGate.getDevopsByEdgesCount(connector.getSession(), edges, from, to);
-        return asList(new CountDTO(rawData));
+        return makeCountResult(asList(new CountDTO(rawData)));
     }
 
     @Override
-    public List<CountDTO> getLastPointCount(Collection<Long> devops) {
+    public DTOResult getLastPointCount(Collection<Long> devops) {
         long rawData = CassandraGate.getLastPointCount(connector.getSession(), devops);
-        return asList(new CountDTO(rawData));
+        return makeCountResult(asList(new CountDTO(rawData)));
     }
 
     private List<MessageDTO> getTrackDataInternal(Map<Long, List<MessageProto.MESSAGE>> rawData) {

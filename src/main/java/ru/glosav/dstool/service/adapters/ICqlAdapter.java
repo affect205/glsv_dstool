@@ -1,28 +1,27 @@
 package ru.glosav.dstool.service.adapters;
 
-import ru.glosav.dstool.entity.rows.dto.*;
+import ru.glosav.dstool.entity.rows.dto.DTOResult;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by abalyshev on 26.04.17.
  */
 public interface ICqlAdapter {
-    List<MessageDTO> getTrackData(Collection<Long> devops, long from, long to);
-    List<MessageDTO> getTrackData(int deviceId, int operatorId, long from, long to);
-    List<EventDTO> getEventData(int deviceId, int operatorId, long from, long to);
-    List<EventDTO> getEventData(Collection<Long> keys, long from, long to);
-    List<EventDTO> getEventDataByTypes(Collection<Long> keys, long from, long to, Collection<Integer> evtTypes);
-    List<MessageDTO> getLastPoint(Collection<Long> keys);
-    List<MessageDTO> getLastPoint(int deviceId, int operatorId);
-    List<DeviceRoutesDTO> getDeviceRoutes(Collection<Long> keys, long from, long to);
-    List<DeviceRoutesDTO> getDeviceRoutes(int deviceId, int operatorId, long from, long to);
-    List<EdgeDTO> getDevopsByEdges(Collection<Long> edges, long from, long to);
-    List<CountDTO> getDeviceRoutesCount(Collection<Long> keys, long from, long to);
-    List<CountDTO> getTrackDataCount(Collection<Long> keys, long from, long to);
-    List<CountDTO> getEventDataCount(Collection<Long> keys, long from, long to);
-    List<CountDTO> getEventDataByTypesCount(Collection<Long> keys, long from, long to, Collection<Integer> evtTypes);
-    List<CountDTO> getDevopsByEdgesCount(Collection<Long> edges, long from, long to);
-    List<CountDTO> getLastPointCount(Collection<Long> keys);
+    DTOResult getTrackData(Collection<Long> devops, long from, long to);
+    DTOResult getTrackData(int deviceId, int operatorId, long from, long to);
+    DTOResult getEventData(int deviceId, int operatorId, long from, long to);
+    DTOResult getEventData(Collection<Long> keys, long from, long to);
+    DTOResult getEventDataByTypes(Collection<Long> keys, long from, long to, Collection<Integer> evtTypes);
+    DTOResult getLastPoint(Collection<Long> keys);
+    DTOResult getLastPoint(int deviceId, int operatorId);
+    DTOResult getDeviceRoutes(Collection<Long> keys, long from, long to);
+    DTOResult getDeviceRoutes(int deviceId, int operatorId, long from, long to);
+    DTOResult getDevopsByEdges(Collection<Long> edges, long from, long to);
+    DTOResult getDeviceRoutesCount(Collection<Long> keys, long from, long to);
+    DTOResult getTrackDataCount(Collection<Long> keys, long from, long to);
+    DTOResult getEventDataCount(Collection<Long> keys, long from, long to);
+    DTOResult getEventDataByTypesCount(Collection<Long> keys, long from, long to, Collection<Integer> evtTypes);
+    DTOResult getDevopsByEdgesCount(Collection<Long> edges, long from, long to);
+    DTOResult getLastPointCount(Collection<Long> keys);
 }

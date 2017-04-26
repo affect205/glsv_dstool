@@ -24,7 +24,7 @@ public class TableUtils {
         put(EventDTO.class, EVENT_DTO_META);
     }};
 
-    public static <K> List<TableColumn<K, ?>> makeColumns(Class<K> clazz) {
+    public static <K> List<TableColumn<K, ?>> makeColumns(Class<? extends IDTORow> clazz) {
         DTOMeta dtoMeta = DTO_ROW_META.get(clazz);
         if (dtoMeta != null) {
             return dtoMeta.columns();
