@@ -22,6 +22,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Scope(SCOPE_SINGLETON)
 public class ClusterConnector {
     private Cluster activeCluster;
+    private CqlConnection activeCqlConn;
     private Session session;
     private Set<CqlConnection> cqlConnPool;
 
@@ -32,25 +33,26 @@ public class ClusterConnector {
 
     public void connect(CqlConnection cqlConn) {
         if (cqlConn == null) return;
-        cqlConnPool.add(cqlConn);
+        activeCqlConn = cqlConn;
+        cqlConnPool.add(activeCqlConn);
         if (activeCluster != null)
             activeCluster.close();
         activeCluster = Cluster
                 .builder()
                 .addContactPoint(cqlConn.getUrl())
                 .build();
-        if (cqlConn.hasKeySpace()) {
-            activeCluster.connect(cqlConn.getKeySpace());
+        if (activeCqlConn.hasKeySpace()) {
+            session = activeCluster.connect(activeCqlConn.getKeySpace());
         } else {
-            activeCluster.connect();
+            session = activeCluster.connect();
         }
+        CassandraGate.ensureStatementsPrepared(session);
     }
 
     public Session getSession() {
-        if (activeCluster == null) return null;
+        if (activeCluster == null || activeCqlConn == null) return null;
         if (session == null || session.isClosed()) {
-            session = activeCluster.newSession();
-            session.execute(format("use ks;"));
+            session = activeCluster.connect(activeCqlConn.getKeySpace());
             CassandraGate.ensureStatementsPrepared(session);
         }
         return session;

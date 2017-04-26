@@ -1,19 +1,20 @@
-package ru.glosav.dstool.dto;
+package ru.glosav.dstool.entity.rows.dto;
 
-import java.nio.ByteBuffer;
+import ru.glosav.dstool.entity.interfaces.IDTORow;
+import ru.glosav.kiask.protobuf.generated.event.EventProto;
 
 /**
  * Created by abalyshev on 24.04.17.
  */
-public class EventDTO {
+public class EventDTO implements IDTORow {
     public long devOp;
     public int devId;
     public int opId;
     public int type;
     public long span;
     public long ts;
-    public ByteBuffer payload;
-    public EventDTO(long devOp, int devId, int opId, int type, long span, long ts, ByteBuffer payload) {
+    public EventProto.EVENT payload;
+    public EventDTO(long devOp, int devId, int opId, int type, long span, long ts, EventProto.EVENT payload) {
         this.devOp = devOp;
         this.devId = devId;
         this.opId = opId;

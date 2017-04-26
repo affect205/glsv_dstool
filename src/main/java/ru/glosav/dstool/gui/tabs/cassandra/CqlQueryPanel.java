@@ -1,11 +1,9 @@
 package ru.glosav.dstool.gui.tabs.cassandra;
 
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -16,25 +14,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-import ru.glosav.dstool.dto.MessageDTO;
+import ru.glosav.dstool.entity.rows.dto.MessageDTO;
 import ru.glosav.dstool.entity.CqlApiMethod;
 import ru.glosav.dstool.event.ExecEvent;
 import ru.glosav.dstool.gui.misc.ConsoleTextArea;
-import ru.glosav.dstool.service.CqlService;
+import ru.glosav.dstool.gui.utils.TableUtils;
+import ru.glosav.dstool.service.CqlAdapterService;
+import ru.glosav.dstool.service.adapters.ICqlAdapter;
+import ru.glosav.kiask.protobuf.generated.message.MessageProto;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static ru.glosav.dstool.gui.misc.converter.Converters.STRING_TO_CQL_API_METHOD;
-import static ru.glosav.dstool.model.CqlApiIModel.getCqlApiMethods;
+import static ru.glosav.dstool.resolver.CqlApiResolver.getCqlApiMethods;
 
 /**
  * Created by abalyshev on 18.04.17.
@@ -45,7 +44,7 @@ public class CqlQueryPanel extends Stage
     private static final Logger log = LoggerFactory.getLogger(CqlQueryPanel.class);
 
     @Autowired
-    private CqlService cqlService;
+    private CqlAdapterService cqlAdapterService;
 
     @Autowired
     private ConsoleTextArea consoleTA;
@@ -71,38 +70,16 @@ public class CqlQueryPanel extends Stage
 
     @PostConstruct
     public void onInit() {
-        MessageDTO testDTO = new MessageDTO(224214L, 213, 7, Instant.now().toEpochMilli(), Instant.now().toEpochMilli(), ByteBuffer.wrap(new byte[] {1, 2, 4, 5}));
+        MessageDTO testDTO = new MessageDTO(224214L, 213, 7, Instant.now().toEpochMilli(), Instant.now().toEpochMilli(), MessageProto.MESSAGE.getDefaultInstance());
+        MessageDTO testDTO2 = new MessageDTO(224214L, 214, 8, Instant.now().toEpochMilli(), Instant.now().toEpochMilli(), MessageProto.MESSAGE.getDefaultInstance());
         List<MessageDTO> testData = new LinkedList<>();
         testData.add(testDTO);
+        testData.add(testDTO2);
 
         TableView<MessageDTO> table = new TableView<>();
-
-        TableColumn<MessageDTO, Integer> devIdCol = new TableColumn<>("device_id");
-        devIdCol.setCellValueFactory(new PropertyValueFactory("devId"));
-        TableColumn<MessageDTO, Integer> opIdCol = new TableColumn<>("operator_id");
-        opIdCol.setCellValueFactory(new PropertyValueFactory("lastName"));
-        TableColumn<MessageDTO, Long> devOpCol = new TableColumn<>("dev_op");
-        devOpCol.setCellValueFactory(new PropertyValueFactory("devOp"));
-        TableColumn<MessageDTO, String> spanCol = new TableColumn<>("span");
-        spanCol.setCellValueFactory(new PropertyValueFactory("span"));
-        TableColumn<MessageDTO, String> tsCol = new TableColumn<>("ts");
-        tsCol.setCellValueFactory(new PropertyValueFactory("ts"));
-        TableColumn<MessageDTO, String> payloadCol = new TableColumn<>("payload");
-        payloadCol.setCellValueFactory(new PropertyValueFactory("payload"));
-
-        DateTimeFormatter df = DateTimeFormatter
-                .ofPattern("dd-MM-yyyy HH:mm:ss")
-                .withZone(ZoneId.systemDefault());
-
-        table.getColumns().setAll(devIdCol, opIdCol, devOpCol, spanCol, tsCol, payloadCol);
+        List<TableColumn<MessageDTO, ?>> columns = TableUtils.makeColumns(MessageDTO.class);
+        table.getColumns().setAll(columns);
         table.setItems(FXCollections.observableArrayList(testData));
-
-        devIdCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().devId));
-        opIdCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().devId));
-        devOpCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().devOp));
-        spanCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(df.format(Instant.ofEpochMilli(p.getValue().span))));
-        tsCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(df.format(Instant.ofEpochMilli(p.getValue().ts))));
-        payloadCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().payload.array().toString()));
 
         argPanelCache = new ConcurrentHashMap<>();
 
@@ -118,26 +95,8 @@ public class CqlQueryPanel extends Stage
 
         root = new BorderPane();
 
-        //apiLv = new ListView<>();
         apiCb = new ComboBox<>();
-        // извлекаем api методы из CassandraGate
-//        List<Method> apiList = Stream.of(CassandraService.class.getMethods())
-//                .filter(m -> Stream.of(Object.class.getMethods())
-//                        .noneMatch(om -> Objects.equals(om.getName(), m.getName()))
-//                )
-//                .collect(Collectors.toList());
-//        apiLv.setItems(FXCollections.observableArrayList(apiList));
-//        apiLv.setPrefHeight(300);
-//        apiLv.setPrefWidth(210);
-//        apiLv.setCellFactory(param -> new ListCell<Method>() {
-//            @Override
-//            protected void updateItem(Method item, boolean empty) {
-//                super.updateItem(item, empty);
-//                if (item != null) {
-//                    setText(item.getName());
-//                }
-//            }
-//        });
+
         apiCb.setItems(FXCollections.observableArrayList(getCqlApiMethods()));
         apiCb.setPromptText("available methods");
         apiCb.setConverter(STRING_TO_CQL_API_METHOD);
@@ -177,12 +136,12 @@ public class CqlQueryPanel extends Stage
     public void onApplicationEvent(ExecEvent event) {
         CqlApiMethod item = apiCb.getSelectionModel().getSelectedItem();
         if (item != null) {
-            for (Method m : CqlService.class.getMethods()) {
+            for (Method m : ICqlAdapter.class.getMethods()) {
                 if (item.getName().equalsIgnoreCase(m.getName()) && item.getArgs().size() == m.getParameterCount()) {
                     if (argPanelCache.get(item.hashCode()) != null) {
                         try {
                             Object[] args = argPanelCache.get(item.hashCode()).getArgs();
-                            Object result = m.invoke(cqlService, args);
+                            Object result = m.invoke(cqlAdapterService, args);
                             String test = "and...";
                         } catch (Exception e) {
                             log.error(e.toString());

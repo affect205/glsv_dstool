@@ -24,6 +24,6 @@ public class CqlApiMethod {
     public Class getType() { return type; }
     @Override
     public String toString() {
-        return String.format("%s(%s): %s", name, Arrays.toString(args.toArray()), type.getName());
+        return String.format("%s(%s): %s", name, Arrays.toString(args.toArray()), type.getSimpleName());
     }
 }
