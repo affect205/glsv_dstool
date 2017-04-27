@@ -3,10 +3,7 @@ package ru.glosav.dstool.resolver;
 import ru.glosav.dstool.entity.CqlApiMethod;
 import ru.glosav.kiask.protobuf.generated.message.MessageProto;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.glosav.dstool.enums.ArgName.*;
@@ -31,12 +28,12 @@ public class CqlApiResolver {
     public static final String GET_DEVOPSBYEDGES_CNT3 = "getDevopsByEdgesCount:3";
     public static final String GET_LASTPOINT_CNT1 = "getLastPointCount:1";
 
-    public static final Map<String, CqlApiMethod> CQL_METHODS = new HashMap<String, CqlApiMethod>(){{
+    public static final Map<String, CqlApiMethod> CQL_METHODS = new TreeMap<String, CqlApiMethod>(){{
         put(GET_TRACKDATA3, new CqlApiMethod("getTrackData", Map.class, DEVOPS, FROM, TO));
         put(GET_TRACKDATA4, new CqlApiMethod("getTrackData", Map.class, DEVICEID, OPERATORID, FROM, TO));
         put(GET_EVENTDATA3, new CqlApiMethod("getEventData", Map.class, DEVOPS, FROM, TO));
         put(GET_EVENTDATABYTYPES4, new CqlApiMethod("getEventDataByTypes", Map.class, DEVOPS, FROM, TO, EVTTYPES));
-        put(GET_LASTPOINT1, new CqlApiMethod("getLastPoint", MessageProto.MESSAGE.class, DEVOPS));
+        put(GET_LASTPOINT1, new CqlApiMethod("getLastPoint", Collection.class, DEVOPS));
         put(GET_LASTPOINT2, new CqlApiMethod("getLastPoint", MessageProto.MESSAGE.class, DEVICEID, OPERATORID));
         put(GET_DEVICEROUTES3, new CqlApiMethod("getDeviceRoutes", Map.class, DEVOPS, FROM, TO));
         put(GET_DEVICEROUTES4, new CqlApiMethod("getDeviceRoutes", Map.class, DEVICEID, OPERATORID, FROM, TO));

@@ -2,15 +2,11 @@ package ru.glosav.dstool.entity.rows.meta;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.control.TableColumn;
-import javafx.util.Pair;
 import ru.glosav.dstool.entity.rows.dto.EventDTO;
 
-import java.nio.ByteBuffer;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
+
+import static ru.glosav.dstool.gui.utils.DateUtils.convertToDateTime;
 
 /**
  * Created by abalyshev on 26.04.17.
@@ -18,25 +14,10 @@ import java.util.Map;
 public class EventDTOMeta extends DTOMeta<EventDTO> {
     public EventDTOMeta() {
         super();
-        names.add(new Pair<>("devOp", "dev_op"));
-        names.add(new Pair<>("devId", "device_id"));
-        names.add(new Pair<>("opId", "operator_id"));
-        names.add(new Pair<>("type", "type"));
-        names.add(new Pair<>("span", "span"));
-        names.add(new Pair<>("ts", "ts"));
-        names.add(new Pair<>("payload", "payload"));
 
-        types.add(new Pair<>("devOp", Long.class));
-        types.add(new Pair<>("devId", Integer.class));
-        types.add(new Pair<>("opId", Integer.class));
-        types.add(new Pair<>("type", Integer.class));
-        types.add(new Pair<>("span", Long.class));
-        types.add(new Pair<>("ts", Long.class));
-        types.add(new Pair<>("payload", ByteBuffer.class));
-
-        DateTimeFormatter df = DateTimeFormatter
-                .ofPattern("dd-MM-yyyy HH:mm:ss")
-                .withZone(ZoneId.systemDefault());
+        TableColumn<EventDTO, Integer> numCol = new TableColumn<>("#");
+        numCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().num));
+        columns.add(numCol);
 
         TableColumn<EventDTO, Integer> devIdCol = new TableColumn<>("device_id");
         devIdCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().devId));
@@ -55,15 +36,15 @@ public class EventDTOMeta extends DTOMeta<EventDTO> {
         columns.add(typeCol);
 
         TableColumn<EventDTO, String> spanCol = new TableColumn<>("span");
-        spanCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(df.format(Instant.ofEpochMilli(p.getValue().span))));
+        spanCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(convertToDateTime(p.getValue().span)));
         columns.add(spanCol);
 
         TableColumn<EventDTO, String> tsCol = new TableColumn<>("ts");
-        tsCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(df.format(Instant.ofEpochMilli(p.getValue().ts))));
+        tsCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(convertToDateTime(p.getValue().ts)));
         columns.add(tsCol);
 
         TableColumn<EventDTO, String> payloadCol = new TableColumn<>("payload");
-        payloadCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().payload.toString()));
+        payloadCol.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(Objects.toString(p.getValue().payload.getHeader())));
         columns.add(payloadCol);
     }
 }

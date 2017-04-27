@@ -157,13 +157,14 @@ public class CqlAdapterService implements ICqlAdapter {
 
     private List<MessageDTO> getTrackDataInternal(Map<Long, List<MessageProto.MESSAGE>> rawData) {
         List<MessageDTO> result = new ArrayList<>();
+        int[] counter = new int[] {1};
         rawData.values().forEach(v -> v.forEach(msg -> {
             int devId   = msg.getHeader().getOid();
             int opId    = msg.getHeader().getOpid();
             long devOp  = generate(devId, opId);
             long ts     = msg.getHeader().getTm();
             long span   = atTheBeginOfSpan(ts, ChronoUnit.MONTHS);
-            MessageDTO dto = new MessageDTO(devOp, devId, opId, span, ts, msg);
+            MessageDTO dto = new MessageDTO(counter[0]++, devOp, devId, opId, span, ts, msg);
             result.add(dto);
         }));
         return result;
@@ -171,6 +172,7 @@ public class CqlAdapterService implements ICqlAdapter {
 
     private List<EventDTO> getEventDataInternal(Map<Long, List<EventProto.EVENT>> rawData) {
         List<EventDTO> result = new ArrayList<>();
+        int[] counter = new int[] {1};
         rawData.values().forEach(v -> v.forEach(evt -> {
             int devId   = evt.getHeader().getDeviceId();
             int opId    = evt.getHeader().getOperatorId();
@@ -178,7 +180,7 @@ public class CqlAdapterService implements ICqlAdapter {
             int type    = evt.getHeader().getEventType().getNumber();
             long ts     = evt.getHeader().getUtc();
             long span   = atTheBeginOfSpan(ts, ChronoUnit.MONTHS);
-            EventDTO dto = new EventDTO(devOp, devId, opId, type, span, ts, evt);
+            EventDTO dto = new EventDTO(counter[0]++, devOp, devId, opId, type, span, ts, evt);
             result.add(dto);
         }));
         return result;

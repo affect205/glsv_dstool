@@ -78,8 +78,8 @@ public class CqlQueryPanel extends Stage implements ApplicationListener<ExecEven
 
     @PostConstruct
     public void onInit() {
-        IDTORow testDTO = new MessageDTO(224214L, 213, 7, Instant.now().toEpochMilli(), Instant.now().toEpochMilli(), MessageProto.MESSAGE.getDefaultInstance());
-        IDTORow testDTO2 = new MessageDTO(224214L, 214, 8, Instant.now().toEpochMilli(), Instant.now().toEpochMilli(), MessageProto.MESSAGE.getDefaultInstance());
+        IDTORow testDTO = new MessageDTO(1, 224214L, 213, 7, Instant.now().toEpochMilli(), Instant.now().toEpochMilli(), MessageProto.MESSAGE.getDefaultInstance());
+        IDTORow testDTO2 = new MessageDTO(2, 224214L, 214, 8, Instant.now().toEpochMilli(), Instant.now().toEpochMilli(), MessageProto.MESSAGE.getDefaultInstance());
         List<IDTORow> testData = new LinkedList<>();
         testData.add(testDTO);
         testData.add(testDTO2);
@@ -101,10 +101,7 @@ public class CqlQueryPanel extends Stage implements ApplicationListener<ExecEven
 
         argWrap = new VBox();
 
-        splitTop = new BorderPane();
-
         apiCb = new ComboBox<>();
-
         apiCb.setItems(FXCollections.observableArrayList(getCqlApiMethods()));
         apiCb.setPromptText("available methods");
         apiCb.setConverter(STRING_TO_CQL_API_METHOD);
@@ -131,6 +128,7 @@ public class CqlQueryPanel extends Stage implements ApplicationListener<ExecEven
         centerPanel.getChildren().addAll(queryTA);
         splitBottom.getChildren().addAll(cqlTable);
 
+        splitTop = new BorderPane();
         splitTop.setTop(runBtn);
         splitTop.setCenter(centerPanel);
         splitTop.setLeft(leftPanel);
@@ -154,7 +152,6 @@ public class CqlQueryPanel extends Stage implements ApplicationListener<ExecEven
                         try {
                             Object[] args = argPanelCache.get(item.hashCode()).getArgs();
                             Object result = m.invoke(cqlAdapterService, args);
-                            String test = "and...";
                             if (result != null) {
                                 eventPublisher.publishEvent(new CqlResultEvent(this, (DTOResult)result));
                             }
